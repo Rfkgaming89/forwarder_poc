@@ -36,6 +36,7 @@ class DirectAdminAPI {
         unset($_SESSION['da_username']);
         unset($_SESSION['da_password']);
         unset($_SESSION['logged_in']);
+        unset($_SESSION['da_server']);
         session_destroy();
     }
     

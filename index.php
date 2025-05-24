@@ -23,15 +23,27 @@ if ($da->restoreSession()) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
+    $server = $_POST['server'] ?? DEFAULT_DA_SERVER;
     
     if (empty($username) || empty($password)) {
         $error = 'Please enter both username and password.';
     } else {
-        if ($da->login($username, $password)) {
-            header('Location: dashboard.php');
-            exit;
+        // Validate server
+        if (!in_array($server, DA_SERVERS)) {
+            $error = 'Invalid server selected.';
         } else {
-            $error = 'Invalid username or password. Please try again.';
+            // Store selected server in session
+            $_SESSION['da_server'] = $server;
+            
+            // Create new API instance with selected server
+            $da = new DirectAdminAPI($server, DA_PORT, DA_PROTOCOL);
+            
+            if ($da->login($username, $password)) {
+                header('Location: dashboard.php');
+                exit;
+            } else {
+                $error = 'Invalid username or password. Please try again.';
+            }
         }
     }
 }
@@ -70,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             font-weight: bold;
             color: #555;
         }
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -115,7 +127,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 <body>
     <div class="container">
         <h1>Email Forwarder Manager</h1>
-        <div class="server-info">Server: <?= htmlspecialchars(DA_SERVER) ?></div>
         
         <?php if ($error): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
@@ -126,6 +137,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         <?php endif; ?>
         
         <form method="POST">
+            <div class="form-group">
+                <label for="server">Server:</label>
+                <select id="server" name="server" required>
+                    <?php 
+                    $selectedServer = $_POST['server'] ?? $_SESSION['da_server'] ?? DEFAULT_DA_SERVER;
+                    foreach (DA_SERVERS as $server): 
+                    ?>
+                        <option value="<?= htmlspecialchars($server) ?>" 
+                                <?= $server === $selectedServer ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($server) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
             <div class="form-group">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required 

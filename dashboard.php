@@ -166,6 +166,7 @@ if ($selectedDomain && in_array($selectedDomain, $domains)) {
 <body>
     <div class="header">
         <h1>Email Forwarder Manager</h1>
+        <div style="font-size: 14px; color: #666; margin-top: 5px;">Server: <?= htmlspecialchars(DA_SERVER) ?></div>
         <a href="index.php?action=logout" class="logout-btn">Logout</a>
     </div>
     
