@@ -1,0 +1,43 @@
+# PHP session files
+/tmp/
+session_*
+
+# Environment and configuration files with sensitive data
+.env
+config_local.php
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs and temporary files
+*.log
+error.log
+access.log
+php_errors.log
+
+# Composer (if used in future)
+/vendor/
+composer.lock
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Cache directories
+cache/
+tmp/
+temp/
