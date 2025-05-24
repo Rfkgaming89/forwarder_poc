@@ -41,3 +41,6 @@ composer.lock
 cache/
 tmp/
 temp/
+
+# Claude Code development files
+CLAUDE.md
