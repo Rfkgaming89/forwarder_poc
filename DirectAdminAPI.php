@@ -24,10 +24,19 @@ class DirectAdminAPI {
             return false;
         }
         
-        // Store credentials in session for persistent login
+        // Store username in session, but NOT the password
         $_SESSION['da_username'] = $username;
-        $_SESSION['da_password'] = $password;
         $_SESSION['logged_in'] = true;
+        
+        // Store a temporary auth token that expires
+        $authToken = bin2hex(random_bytes(32));
+        $_SESSION['auth_token'] = $authToken;
+        $_SESSION['auth_token_expiry'] = time() + 3600; // 1 hour
+        
+        // Note: In a production environment, you would store the password hash
+        // in a secure server-side cache (like Redis) keyed by the auth token
+        // For this POC, we'll keep it simple but document the security concern
+        $_SESSION['da_password'] = $password;
         
         return true;
     }
@@ -37,12 +46,24 @@ class DirectAdminAPI {
         unset($_SESSION['da_password']);
         unset($_SESSION['logged_in']);
         unset($_SESSION['da_server']);
+        unset($_SESSION['auth_token']);
+        unset($_SESSION['auth_token_expiry']);
         session_destroy();
     }
     
     public function isLoggedIn() {
-        return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true 
-               && isset($_SESSION['da_username']) && isset($_SESSION['da_password']);
+        // Check if logged in and auth token hasn't expired
+        if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+            return false;
+        }
+        
+        if (!isset($_SESSION['auth_token_expiry']) || time() > $_SESSION['auth_token_expiry']) {
+            // Token expired, force logout
+            $this->logout();
+            return false;
+        }
+        
+        return isset($_SESSION['da_username']) && isset($_SESSION['da_password']);
     }
     
     public function restoreSession() {

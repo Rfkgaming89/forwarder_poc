@@ -56,10 +56,40 @@ daforwarders/
 ## Security Features
 
 - Session-based authentication with automatic timeout
+- Auth token expiry independent of session timeout
 - CSRF protection through session validation
 - Input validation and sanitization
 - SQL injection prevention (no direct database queries)
 - XSS prevention through proper HTML escaping
+
+⚠️ **Security Notice**: This proof of concept stores passwords in session data. For production use, consider:
+- Using DirectAdmin Login Keys (see below)
+- Implementing a secure server-side cache (Redis/Memcached) for credentials
+- Using OAuth or similar token-based authentication if available
+
+### Enhanced Security with DirectAdmin Login Keys
+
+For production use, we strongly recommend using DirectAdmin Login Keys instead of your main account password:
+
+1. **Create a Login Key in DirectAdmin**:
+   - Login to your DirectAdmin control panel
+   - Navigate to Account Manager → Login Keys
+   - Create a new key with API access permissions
+   - Restrict the key to only the commands needed:
+     - CMD_API_SHOW_USER_CONFIG
+     - CMD_API_SHOW_DOMAINS
+     - CMD_API_EMAIL_FORWARDERS
+
+2. **Use the Login Key**:
+   - Use your regular username when logging in
+   - Use the Login Key value as the password
+   - This provides better security by not exposing your main account password
+
+3. **Benefits**:
+   - Limit IP access to specific addresses
+   - Set expiration dates
+   - Restrict available commands
+   - Easy revocation without changing main password
 
 ## Configuration
 
