@@ -191,6 +191,13 @@ sudo lsof -i :3311
 ports:
   - "3312:80"  # Use different port
 ```
+### open config.php
+```bash
+and change
+
+define('DEFAULT_DA_SERVER', 'glacier.mxrouting.net');
+to your server
+```
 
 ## 📝 Requirements
 
