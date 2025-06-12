@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  mxroute-forwarder:
+    build: .
+    container_name: mxroute-forwarder
+    ports:
+      - "3311:80"
+    restart: unless-stopped
