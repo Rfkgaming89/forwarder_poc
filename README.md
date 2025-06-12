@@ -4,142 +4,208 @@
 
 A PHP web application for managing email forwarders through the DirectAdmin API on MXroute servers.
 
-## Features
+# MXRoute Email Forwarder - Docker
 
-- **Server Selection**: Choose from 21 available MXroute servers at login
-- **Secure Login**: Authenticate with your DirectAdmin username and password
-- **Persistent Sessions**: Stay logged in until logout or session timeout (1 hour)
-- **Domain Selection**: Choose from all domains in your DirectAdmin account
-- **Email Forwarder Management**: 
-  - View all email forwarders for a selected domain
-  - Add new email forwarders
-  - Edit existing forwarders
-  - Delete forwarders with confirmation
+A self-contained Docker setup for the MXRoute Email Forwarder application. Perfect for NAS deployments with zero external dependencies.
 
-## Requirements
+## 🚀 Quick Start
 
-- PHP 7.0 or higher
-- cURL extension enabled
-- Web server (Apache, Nginx, etc.)
+1. **Clone or download the MXRoute forwarder files**
+2. **Place the Docker files in the same directory as your PHP files**
+3. **Build and run:**
+   ```bash
+   docker-compose up -d --build
+   ```
+4. **Access the application:** `http://your-server-ip:3311`
 
-## Installation
+## 📁 Directory Structure
 
-1. Upload all files to your web server directory
-2. Ensure your web server has write permissions for session management
-3. Access the application through your web browser
-
-## File Structure
+Your directory should look like this:
 
 ```
-daforwarders/
-├── config.php              # Configuration and session management
-├── DirectAdminAPI.php       # DirectAdmin API wrapper class
-├── index.php               # Login page
-├── dashboard.php           # Main dashboard with domain selection
-├── manage_forwarder.php    # Add/edit/delete forwarders
-└── README.md              # This documentation
+mxroute-forwarder/
+├── Dockerfile
+├── docker-compose.yml
+├── config.php
+├── DirectAdminAPI.php
+├── index.php
+├── dashboard.php
+└── manage_forwarder.php
 ```
 
-## Usage
+## 🔧 Configuration
 
-1. **Login**: 
-   - Select your MXroute server from the dropdown list
-   - Enter your DirectAdmin username and password
-2. **Select Domain**: Choose a domain from the dropdown on the dashboard
-3. **Manage Forwarders**: 
-   - View existing forwarders in the table
-   - Click "Add New Forwarder" to create a new one
-   - Click "Edit" to modify an existing forwarder
-   - Click "Delete" to remove a forwarder (with confirmation)
-4. **Logout**: Click the logout button in the header to end your session
+### Changing the Port
 
-## Security Features
+The default external port is `3311`. To change it:
 
-- Session-based authentication with automatic timeout
-- Auth token expiry independent of session timeout
-- CSRF protection through session validation
-- Input validation and sanitization
-- SQL injection prevention (no direct database queries)
-- XSS prevention through proper HTML escaping
+1. **Edit `docker-compose.yml`:**
+   ```yaml
+   ports:
+     - "YOUR_PORT:80"  # Change YOUR_PORT to desired port
+   ```
 
-⚠️ **Security Notice**: This proof of concept stores passwords in session data. For production use, consider:
-- Using DirectAdmin Login Keys (see below)
-- Implementing a secure server-side cache (Redis/Memcached) for credentials
-- Using OAuth or similar token-based authentication if available
+2. **Examples:**
+   ```yaml
+   # For port 8080
+   ports:
+     - "8080:80"
+   
+   # For port 9000
+   ports:
+     - "9000:80"
+   
+   # For port 3000
+   ports:
+     - "3000:80"
+   ```
 
-### Enhanced Security with DirectAdmin Login Keys
+3. **Rebuild the container:**
+   ```bash
+   docker-compose down
+   docker-compose up -d --build
+   ```
 
-For production use, we strongly recommend using DirectAdmin Login Keys instead of your main account password:
+> **Note:** Always keep the right side as `:80` (internal container port). Only change the left side (external port).
 
-1. **Create a Login Key in DirectAdmin**:
-   - Login to your DirectAdmin control panel
-   - Navigate to Account Manager → Login Keys
-   - Create a new key with API access permissions
-   - Restrict the key to only the commands needed:
-     - CMD_API_SHOW_USER_CONFIG
-     - CMD_API_SHOW_DOMAINS
-     - CMD_API_EMAIL_FORWARDERS
+## 🐳 Docker Commands
 
-2. **Use the Login Key**:
-   - Use your regular username when logging in
-   - Use the Login Key value as the password
-   - This provides better security by not exposing your main account password
+### Basic Operations
+```bash
+# Build and start
+docker-compose up -d --build
 
-3. **Benefits**:
-   - Limit IP access to specific addresses
-   - Set expiration dates
-   - Restrict available commands
-   - Easy revocation without changing main password
+# Stop the container
+docker-compose down
 
-## Configuration
+# View logs
+docker-compose logs -f
 
-The application supports the following MXroute servers:
+# Restart
+docker-compose restart
 
-- eagle.mxlogin.com
-- pixel.mxrouting.net
-- taylor.mxrouting.net
-- sunfire.mxrouting.net
-- blizzard.mxrouting.net
-- longhorn.mxrouting.net
-- safari.mxrouting.net
-- lucy.mxrouting.net
-- arrow.mxrouting.net (default)
-- echo.mxrouting.net
-- london.mxroute.com
-- shadow.mxrouting.net
-- moose.mxrouting.net
-- tuesday.mxrouting.net
-- monday.mxrouting.net
-- wednesday.mxrouting.net
-- redbull.mxrouting.net
-- witcher.mxrouting.net
-- heracles.mxrouting.net
-- everest.mxrouting.net
-- glacier.mxrouting.net
+# Rebuild after changes
+docker-compose down
+docker-compose up -d --build
+```
 
-You can modify `config.php` to:
+### Manual Docker Commands
+```bash
+# Build image manually
+docker build -t mxroute-forwarder .
 
-- Add or remove servers from the list
-- Change the default server
-- Adjust port number (default: 2222)
-- Change protocol (default: https)
-- Modify session timeout (default: 1 hour)
+# Run container manually (using port 3311)
+docker run -d -p 3311:80 --name mxroute-forwarder mxroute-forwarder
 
-## API Endpoints Used
+# Stop and remove
+docker stop mxroute-forwarder
+docker rm mxroute-forwarder
+```
 
-The application uses the following DirectAdmin API commands:
+## 🛠️ Updating the Application
 
-- `CMD_API_SHOW_USER_CONFIG` - Validate user credentials
-- `CMD_API_SHOW_DOMAINS` - Get list of domains
-- `CMD_API_EMAIL_FORWARDERS` - Manage email forwarders
+To update your PHP files:
 
-## Troubleshooting
+1. **Replace the PHP files** in your directory
+2. **Rebuild the container:**
+   ```bash
+   docker-compose down
+   docker-compose up -d --build
+   ```
 
-- **Login fails**: Verify your DirectAdmin credentials and ensure the server is accessible
-- **Domains not loading**: Check if your account has proper permissions to view domains
-- **Forwarders not saving**: Ensure your account has email management permissions
-- **Session timeout**: Sessions expire after 1 hour of inactivity for security
+The new files will be baked into the image.
 
-## Support
+## 🔒 Security Features
 
-This application is designed specifically for MXroute customers. Select your server from the dropdown when logging in. For DirectAdmin-related issues, contact MXroute support.
+This Docker setup includes:
+
+- ✅ **Security headers** (X-Frame-Options, X-XSS-Protection, etc.)
+- ✅ **Directory browsing disabled**
+- ✅ **Sensitive files hidden** (.md, .log files)
+- ✅ **PHP security settings** (expose_php off, display_errors off)
+- ✅ **Session security** (httponly, strict mode)
+- ✅ **Server signature hidden**
+
+## 🏠 NAS-Specific Notes
+
+### Synology NAS
+- Use **Container Manager** or SSH
+- Default port 3311 should work fine
+- Access via `http://synology-ip:3311`
+
+### QNAP NAS
+- Use **Container Station** or SSH
+- May need to check firewall settings
+- Access via `http://qnap-ip:3311`
+
+### TrueNAS/FreeNAS
+- Use **Apps** section or SSH
+- Ensure port 3311 is not blocked
+- Access via `http://truenas-ip:3311`
+
+## 📊 Resource Usage
+
+This container is lightweight:
+- **Memory:** ~50-100MB
+- **CPU:** Minimal (only during web requests)
+- **Storage:** ~200MB (base image + your files)
+
+## 🐛 Troubleshooting
+
+### Container won't start
+```bash
+# Check logs
+docker-compose logs
+
+# Check if port is in use
+netstat -tlnp | grep 3311
+```
+
+### Can't access the application
+1. **Check if container is running:**
+   ```bash
+   docker-compose ps
+   ```
+
+2. **Check firewall settings** on your NAS
+
+3. **Try different port** in `docker-compose.yml`
+
+4. **Check logs for errors:**
+   ```bash
+   docker-compose logs -f
+   ```
+
+### Permission issues
+```bash
+# Fix file permissions before building
+chmod -R 755 .
+```
+
+### Port already in use
+```bash
+# Find what's using the port
+sudo lsof -i :3311
+
+# Or change port in docker-compose.yml
+ports:
+  - "3312:80"  # Use different port
+```
+
+## 📝 Requirements
+
+- **Docker** and **Docker Compose** installed
+- **MXRoute account** with DirectAdmin access
+- **Network access** to MXRoute servers
+
+## 🔗 Related Links
+
+- [Original MXRoute Forwarder](https://github.com/mxroute/forwarder_poc)
+- [Docker Documentation](https://docs.docker.com/)
+- [MXRoute Support](https://mxroute.com/)
+
+## 📄 License
+
+This Docker setup follows the same license as the original MXRoute forwarder application.
+
+---
